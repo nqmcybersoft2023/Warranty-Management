@@ -247,44 +247,46 @@
 						<script src="https://unpkg.com/jsqr/dist/jsqr.js"></script>
 						<script>
 							function scanQRCode() {
-								// Tạo một canvas để hiển thị video từ camera
-								const canvas = document.createElement('canvas');
-								const context = canvas.getContext('2d');
-						
-								// Truy cập camera
-								navigator.mediaDevices.getUserMedia({ video: true })
-									.then(stream => {
-										// Tạo một video element và gán stream vào
-										const video = document.createElement('video');
-										video.srcObject = stream;
-										video.play();
-						
-										// Vẽ video lên canvas
-										function drawVideo() {
-											context.drawImage(video, 0, 0, canvas.width, canvas.height);
-											requestAnimationFrame(drawVideo);
-										}
-										drawVideo();
-						
-										// Quét QR code từ canvas
-										function decodeQRCode() {
-											const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-											const code = jsQR(imageData.data, imageData.width, imageData.height);
-											if (code) {
-												// Hiển thị nội dung QR code vào ô input
-												document.getElementById('maIMEI').value = code.data;
-												// Dừng camera
-												stream.getTracks().forEach(track => track.stop());
-											} else {
-												requestAnimationFrame(decodeQRCode);
-											}
-										}
-										decodeQRCode();
-									})
-									.catch(error => {
-										console.error('Lỗi truy cập camera:', error);
-									});
-							}
+    // Tạo một canvas để hiển thị video từ camera
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    // Truy cập camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            // Tạo một video element và gán stream vào
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+
+            // Vẽ video lên canvas
+            function drawVideo() {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                requestAnimationFrame(drawVideo);
+            }
+            drawVideo();
+
+            // Quét QR code từ canvas
+            function decodeQRCode() {
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                if (code) {
+                    // Hiển thị nội dung QR code vào ô input
+                    document.getElementById('maIMEI').value = code.data;
+                    // Dừng camera
+                    stream.getTracks().forEach(track => track.stop());
+                    // Dừng quét
+                    return;
+                }
+                requestAnimationFrame(decodeQRCode);
+            }
+            decodeQRCode();
+        })
+        .catch(error => {
+            console.error('Lỗi truy cập camera:', error);
+            alert('Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.');
+        });
+}
 						</script>
 						
 						<div class="form-group">
